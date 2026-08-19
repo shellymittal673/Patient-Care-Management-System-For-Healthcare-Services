@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Appointment Confirmed{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin:20px auto;">
+  <div class="card" style="text-align:center;">
+    <div style="width:64px; height:64px; border-radius:50%; background:#e8f7ef; color:#1f9d63;
+                display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 14px;">
+      &#10003;
+    </div>
+    <h2 style="color:#1f9d63; margin:0 0 4px;">Appointment Booked Successfully!</h2>
+    <p class="page-sub">Your appointment has been confirmed.</p>
+
+    <div class="card" style="text-align:left; background:#fafcfd; box-shadow:none;">
+      <h3 style="margin-top:0; font-size:0.9rem; color:var(--header);">Appointment Details</h3>
+      <table class="info-table">
+        <tr><td>Patient Name</td><td>{{ appointment.patient.full_name }}</td></tr>
+        <tr><td>Doctor</td><td>Dr. {{ appointment.doctor.full_name }} ({{ appointment.doctor.specialization or 'General' }})</td></tr>
+        <tr><td>Date</td><td>{{ appointment.appointment_date }}</td></tr>
+        <tr><td>Time</td><td>{{ appointment.appointment_time }}</td></tr>
+        <tr><td>Status</td><td><span class="badge badge-scheduled">{{ appointment.status }}</span></td></tr>
+      </table>
+    </div>
+
+    <div class="flash success" style="text-align:left;">Please arrive 15 minutes before your appointment time.</div>
+
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <a href="{{ url_for('appointments.new_appointment') }}" class="btn btn-primary" style="flex:1;">Book Another Appointment</a>
+      <a href="{{ url_for('dashboard.home') }}" class="btn btn-outline" style="flex:1;">Go to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

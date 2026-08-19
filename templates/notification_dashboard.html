@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Notification Management{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Notifications</div>
+<h2 class="page-title">&#128276; Notification Dashboard</h2>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="num">{{ total }}</div><div class="label">Total Notifications</div></div>
+  <div class="stat-card"><div class="num" style="color:#966b13;">{{ unread }}</div><div class="label">Unread</div></div>
+  <div class="stat-card"><div class="num" style="color:var(--doctor);">{{ delivered }}</div><div class="label">Delivered Successfully</div></div>
+  <div class="stat-card"><div class="num" style="color:#b0362a;">{{ failed }}</div><div class="label">Failed Notifications</div></div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>All Notifications</h3></div>
+  <table>
+    <thead><tr><th>#</th><th>Patient</th><th>Type</th><th>Message</th><th>Delivery</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for n in notifications %}
+      <tr>
+        <td>NOT{{ '%04d'|format(n.id) }}</td>
+        <td>{{ n.patient.full_name if n.patient else '—' }}</td>
+        <td>{{ n.notif_type }}</td>
+        <td style="max-width:280px;">{{ n.message }}</td>
+        <td>{{ n.delivery_method }}</td>
+        <td>
+          {% if n.status == 'Delivered' %}<span class="badge badge-scheduled">Delivered</span>
+          {% elif n.status == 'Read' %}<span class="badge badge-completed">Read</span>
+          {% else %}<span class="badge badge-cancelled">Failed</span>{% endif %}
+        </td>
+        <td>
+          {% if n.status != 'Read' %}
+          <form method="POST" action="{{ url_for('notifications.mark_read', notification_id=n.id) }}">
+            <button type="submit" class="btn btn-outline btn-sm">Mark Read</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty-state">No notifications yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div style="display:flex; gap:10px;">
+  <form method="POST" action="{{ url_for('notifications.mark_all_read') }}"><button type="submit" class="btn btn-outline">&#10003; Mark All as Read</button></form>
+  {% if current_user.role == 'admin' %}
+  <form method="POST" action="{{ url_for('notifications.generate') }}"><button type="submit" class="btn btn-primary">&#8635; Refresh (Generate from Live Data)</button></form>
+  <form method="POST" action="{{ url_for('notifications.send_test') }}"><button type="submit" class="btn btn-green">&#9993; Send Test Notification</button></form>
+  {% endif %}
+</div>
+{% endblock %}

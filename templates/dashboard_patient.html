@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+
+<h2 class="page-title">Welcome, {{ current_user.full_name }}</h2>
+<p class="page-sub">Your appointments and health records</p>
+
+{% if patient %}
+<div class="grid-2" style="margin-bottom:24px;">
+  <a href="{{ url_for('patients.view_patient', patient_id=patient.id) }}" class="card" style="text-decoration:none; color:inherit;">
+    <strong>My Profile</strong>
+    <p class="page-sub" style="margin:4px 0 0;">View or update your details</p>
+  </a>
+  <a href="{{ url_for('appointments.new_appointment') }}" class="card" style="text-decoration:none; color:inherit;">
+    <strong>+ Book Appointment</strong>
+    <p class="page-sub" style="margin:4px 0 0;">Schedule a consultation with a doctor</p>
+  </a>
+</div>
+{% endif %}
+
+<div class="card">
+  <strong>Your Appointments</strong>
+  <table style="margin-top:12px;">
+    <thead>
+      <tr><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for a in appointments %}
+      <tr>
+        <td>Dr. {{ a.doctor.full_name }}</td>
+        <td>{{ a.appointment_date }}</td>
+        <td>{{ a.appointment_time }}</td>
+        <td><span class="badge badge-{{ a.status.lower().replace('-', '') }}">{{ a.status }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-state">No appointments yet. Book your first one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

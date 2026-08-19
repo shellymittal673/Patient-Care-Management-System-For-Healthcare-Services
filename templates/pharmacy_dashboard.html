@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Pharmacy Management{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Pharmacy</div>
+<h2 class="page-title">&#128138; Pharmacy Dashboard</h2>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="num">{{ total_medicines }}</div><div class="label">Total Medicines</div></div>
+  <div class="stat-card"><div class="num">{{ available_stock }}</div><div class="label">Available Stock</div></div>
+  <div class="stat-card"><div class="num" style="color:#966b13;">{{ low_stock }}</div><div class="label">Low Stock Medicines</div></div>
+  <div class="stat-card"><div class="num" style="color:#b0362a;">{{ expired }}</div><div class="label">Expired Medicines</div></div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h3>&#128138; Medicine Inventory</h3>
+    <form method="GET" style="display:flex; gap:8px;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search medicine by name" style="width:220px;">
+      <button type="submit" class="btn btn-outline btn-sm">Search</button>
+    </form>
+  </div>
+  <table>
+    <thead><tr><th>Medicine ID</th><th>Name</th><th>Category</th><th>Manufacturer</th><th>Stock</th><th>Unit Price (₹)</th><th>Expiry Date</th><th>Status</th>
+    {% if current_user.role in ['admin', 'pharmacist'] %}<th>Action</th>{% endif %}</tr></thead>
+    <tbody>
+      {% for m in medicines %}
+      <tr>
+        <td>MED{{ '%03d'|format(m.id) }}</td>
+        <td>{{ m.name }}</td>
+        <td>{{ m.category or '—' }}</td>
+        <td>{{ m.manufacturer or '—' }}</td>
+        <td>{{ m.stock }}</td>
+        <td>{{ '%.2f'|format(m.unit_price or 0) }}</td>
+        <td>{{ m.expiry_date or '—' }}</td>
+        <td>
+          {% if m.status == 'Available' %}<span class="badge badge-completed">{{ m.status }}</span>
+          {% elif m.status == 'Low Stock' %}<span class="badge badge-noshow">{{ m.status }}</span>
+          {% else %}<span class="badge badge-cancelled">{{ m.status }}</span>{% endif %}
+        </td>
+        {% if current_user.role in ['admin', 'pharmacist'] %}
+        <td class="action-links">
+          <form method="POST" action="{{ url_for('pharmacy.update_stock', medicine_id=m.id) }}" style="display:flex; gap:4px;">
+            <input type="number" name="stock" value="{{ m.stock }}" style="width:70px; padding:5px 8px;">
+            <button type="submit" class="btn btn-edit btn-sm">&#9998;</button>
+          </form>
+          {% if current_user.role == 'admin' %}
+          <form method="POST" action="{{ url_for('pharmacy.delete_medicine', medicine_id=m.id) }}" onsubmit="return confirm('Remove {{ m.name }}?');">
+            <button type="submit" class="btn btn-delete btn-sm">&#128465;</button>
+          </form>
+          {% endif %}
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="empty-state">No medicines in inventory yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if current_user.role in ['admin', 'pharmacist'] %}
+<div class="grid-2">
+  <div class="card">
+    <div class="card-head"><h3>&#10133; Add Medicine</h3></div>
+    <form method="POST" action="{{ url_for('pharmacy.add_medicine') }}">
+      <label>Medicine Name *</label>
+      <input type="text" name="name" required placeholder="e.g. Paracetamol 500 mg">
+      <div class="grid-2">
+        <div>
+          <label>Category</label>
+          <select name="category">
+            <option>Tablet</option><option>Capsule</option><option>Syrup</option><option>Injection</option><option>Ointment</option>
+          </select>
+        </div>
+        <div>
+          <label>Manufacturer</label>
+          <input type="text" name="manufacturer" placeholder="e.g. ABC Pharma Ltd.">
+        </div>
+      </div>
+      <div class="grid-3">
+        <div>
+          <label>Stock</label>
+          <input type="number" name="stock" min="0" value="0">
+        </div>
+        <div>
+          <label>Unit Price (₹)</label>
+          <input type="number" name="unit_price" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Expiry Date</label>
+          <input type="date" name="expiry_date">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:12px;">+ Add Medicine</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>&#128137; Dispense Medicine</h3></div>
+    <form method="POST" action="{{ url_for('pharmacy.dispense') }}">
+      <label>Patient</label>
+      <select name="patient_id" required>
+        <option value="">Select patient</option>
+        {% for p in patients %}
+        <option value="{{ p.id }}">{{ p.full_name }}</option>
+        {% endfor %}
+      </select>
+      <label>Medicine</label>
+      <select name="medicine_id" required>
+        <option value="">Select medicine</option>
+        {% for m in medicines %}
+        <option value="{{ m.id }}">{{ m.name }} (Stock: {{ m.stock }})</option>
+        {% endfor %}
+      </select>
+      <label>Quantity</label>
+      <input type="number" name="quantity" min="1" required>
+      <button type="submit" class="btn btn-green" style="margin-top:12px;">&#128138; Dispense Medicine</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

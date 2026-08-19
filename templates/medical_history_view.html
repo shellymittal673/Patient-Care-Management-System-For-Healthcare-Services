@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Medical History · {{ patient.full_name }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('medical_history.list_patients') }}">Medical History</a> / {{ patient.full_name }}</div>
+
+<div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+  <div style="display:flex; align-items:center; gap:14px;">
+    <div class="avatar-circle" style="width:56px; height:56px; font-size:1.3rem; margin:0;">{{ patient.full_name[0] }}</div>
+    <div>
+      <div style="font-weight:700; font-size:1.05rem; color:var(--admin);">{{ patient.full_name }}</div>
+      <div style="font-size:0.78rem; color:var(--ink-soft);">
+        PID: PID{{ '%05d'|format(patient.id) }} &nbsp;|&nbsp; {{ patient.gender or '—' }} &nbsp;|&nbsp; {{ patient.age or '—' }} Yrs
+        &nbsp;|&nbsp; {{ patient.contact_number or '—' }} &nbsp;|&nbsp; {{ patient.email or '—' }}
+      </div>
+    </div>
+  </div>
+  <div style="text-align:right; font-size:0.8rem; color:var(--ink-soft);">
+    Blood Group: <b style="color:var(--ink);">{{ patient.blood_group or '—' }}</b><br>
+    Allergies: <b style="color:#c0392b;">{{ patient.allergies[0].allergen if patient.allergies else 'None known' }}</b><br>
+    Chronic Conditions: <b style="color:var(--ink);">{{ patient.chronic_diseases or 'None' }}</b>
+  </div>
+  <a href="{{ url_for('ehr.view', patient_id=patient.id) }}" class="btn btn-primary btn-sm">+ New Encounter</a>
+</div>
+
+<div class="grid-3">
+  <div class="card" style="box-shadow:none; border:1px solid var(--line-soft); margin-bottom:0;">
+    <h3 style="margin-top:0; font-size:0.9rem;">&#129517; Past Illness History</h3>
+    <table>
+      <thead><tr><th>Illness</th><th>Year</th></tr></thead>
+      <tbody>
+        {% for i in patient.past_illnesses %}
+        <tr><td>{{ i.illness }}</td><td>{{ i.year or '—' }}</td></tr>
+        {% else %}
+        <tr><td colspan="2" class="empty-state">None recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="box-shadow:none; border:1px solid var(--line-soft); margin-bottom:0;">
+    <h3 style="margin-top:0; font-size:0.9rem;">&#9878; Past Surgeries</h3>
+    <table>
+      <thead><tr><th>Surgery</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for s in patient.past_surgeries %}
+        <tr><td>{{ s.surgery }}</td><td>{{ s.surgery_date or '—' }}</td></tr>
+        {% else %}
+        <tr><td colspan="2" class="empty-state">None recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="box-shadow:none; border:1px solid var(--line-soft); margin-bottom:0;">
+    <h3 style="margin-top:0; font-size:0.9rem;">&#128106; Family History</h3>
+    <table>
+      <thead><tr><th>Condition</th><th>Relation</th></tr></thead>
+      <tbody>
+        {% for f in patient.family_history %}
+        <tr><td>{{ f.condition }}</td><td>{{ f.relation or '—' }}</td></tr>
+        {% else %}
+        <tr><td colspan="2" class="empty-state">None recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card" style="box-shadow:none; border:1px solid #fdeceb;">
+    <h3 style="margin-top:0; font-size:0.9rem; color:#c0392b;">&#9888; Allergies</h3>
+    <table>
+      <thead><tr><th>Allergen</th><th>Reaction</th></tr></thead>
+      <tbody>
+        {% for a in patient.allergies %}
+        <tr><td>{{ a.allergen }}</td><td>{{ a.reaction or '—' }}</td></tr>
+        {% else %}
+        <tr><td colspan="2" class="empty-state">No known allergies.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="box-shadow:none; border:1px solid var(--doctor-soft);">
+    <h3 style="margin-top:0; font-size:0.9rem; color:var(--doctor);">&#128138; Current Medications</h3>
+    <table>
+      <thead><tr><th>Medication</th><th>Dose</th><th>Frequency</th><th>Since</th></tr></thead>
+      <tbody>
+        {% for m in patient.medications %}
+        <tr><td>{{ m.medicine_name }}</td><td>{{ m.dosage or '—' }}</td><td>{{ m.frequency or '—' }}</td><td>{{ m.start_date }}</td></tr>
+        {% else %}
+        <tr><td colspan="4" class="empty-state">No current medications.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Recent Medical History</h3></div>
+  <table>
+    <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Physician</th><th>Notes</th></tr></thead>
+    <tbody>
+      {% for item in timeline %}
+      <tr>
+        <td>{{ item.date }}</td>
+        <td>{{ item.type }}</td>
+        <td>{{ item.description }}</td>
+        <td>Dr. {{ item.physician }}</td>
+        <td><a href="{{ item.link }}">View Details</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">No medical history recorded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{{ url_for('ehr.view', patient_id=patient.id) }}" style="font-size:0.8rem; font-weight:600;">View Complete History &rarr;</a>
+</div>
+{% endblock %}

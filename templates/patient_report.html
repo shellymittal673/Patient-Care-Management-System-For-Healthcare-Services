@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Patient Report · {{ patient.full_name }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('dashboard.reports') }}">Reports &amp; Search</a> / Report</div>
+
+<div class="card-head">
+  <h2 class="page-title" style="margin-bottom:0;">Patient Report</h2>
+  <button onclick="window.print()" class="btn btn-primary">&#128424; Print / Save as PDF</button>
+</div>
+
+<div class="card" style="max-width:700px;">
+  <div style="text-align:center; font-weight:700; color:var(--admin); font-size:1.1rem;">Integrated Patient Care Management System</div>
+  <div style="text-align:center; color:var(--ink-soft); font-size:0.78rem; margin-bottom:16px;">Generated on {{ generated_on }}</div>
+
+  <h3 style="font-size:0.9rem; color:var(--admin);">Patient Information</h3>
+  <table class="info-table" style="margin-bottom:16px;">
+    <tr><td>Patient ID</td><td>P{{ '%04d'|format(patient.id) }}</td></tr>
+    <tr><td>Full Name</td><td>{{ patient.full_name }}</td></tr>
+    <tr><td>Age</td><td>{{ patient.age or '—' }}</td></tr>
+    <tr><td>Gender</td><td>{{ patient.gender or '—' }}</td></tr>
+    <tr><td>Blood Group</td><td>{{ patient.blood_group or '—' }}</td></tr>
+    <tr><td>Phone</td><td>{{ patient.contact_number or '—' }}</td></tr>
+    <tr><td>Address</td><td>{{ patient.address or '—' }}</td></tr>
+  </table>
+
+  <h3 style="font-size:0.9rem; color:var(--doctor);">Medical Summary</h3>
+  <table class="info-table" style="margin-bottom:16px;">
+    <tr><td>Height / Weight</td><td>{{ patient.height_cm ~ ' cm' if patient.height_cm else '—' }} / {{ patient.weight_kg ~ ' kg' if patient.weight_kg else '—' }}</td></tr>
+    <tr><td>BMI</td><td>{{ patient.bmi or '—' }}</td></tr>
+    <tr><td>Chronic Diseases</td><td>{{ patient.chronic_diseases or 'None' }}</td></tr>
+    <tr><td>Allergies</td><td>{{ patient.allergies|map(attribute='allergen')|join(', ') or 'None known' }}</td></tr>
+    <tr><td>Current Medications</td><td>{{ patient.medications|map(attribute='medicine_name')|join(', ') or 'None' }}</td></tr>
+  </table>
+
+  <h3 style="font-size:0.9rem; color:var(--nurse);">Recent Consultations</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Diagnosis</th><th>Doctor</th></tr></thead>
+    <tbody>
+      {% for c in patient.consultations[:5] %}
+      <tr><td>{{ c.consultation_date }}</td><td>{{ c.diagnosis or '—' }}</td><td>Dr. {{ c.doctor.full_name }}</td></tr>
+      {% else %}
+      <tr><td colspan="3" class="empty-state">No consultations recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="flash success" style="margin-top:16px; text-align:center;">This is a system-generated report for internal review.</div>
+</div>
+{% endblock %}

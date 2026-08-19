@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Register · Patient Care{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div style="max-width:480px; margin:0 auto;">
+    <div class="card">
+      <h2 class="page-title" style="text-align:center; color:var(--header);">Create an Account</h2>
+      <p class="page-sub" style="text-align:center;">Register as a new user of the system</p>
+
+      <form method="POST" action="{{ url_for('auth.register') }}">
+        <label>Register as</label>
+        <select name="role" style="margin-bottom:6px;">
+          <option value="patient">Patient</option>
+          <option value="doctor">Doctor</option>
+          <option value="nurse">Nurse</option>
+          <option value="pharmacist">Pharmacist</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        <label for="full_name">Full Name</label>
+        <input type="text" id="full_name" name="full_name" placeholder="Your full name" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+
+        <label for="phone_number">Phone Number</label>
+        <input type="text" id="phone_number" name="phone_number" placeholder="10-digit number">
+
+        <div class="grid-2">
+          <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <div>
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:18px;">Register</button>
+      </form>
+
+      <p style="text-align:center; font-size:12.5px; color:var(--ink-soft); margin-top:16px;">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

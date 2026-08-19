@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Nurse Dashboard{% endblock %}
+{% block content %}
+
+<h2 class="page-title">Welcome, {{ current_user.full_name }}</h2>
+<p class="page-sub">Nursing staff overview</p>
+
+<div class="stats-row" style="grid-template-columns:repeat(2,1fr);">
+  <div class="stat-card">
+    <div class="num">{{ total_patients }}</div>
+    <div class="label">Total Patients</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">{{ todays_appointments|length }}</div>
+    <div class="label">Today's Appointments</div>
+  </div>
+</div>
+
+<div class="card">
+  <strong>Today's Appointments</strong>
+  <table style="margin-top:12px;">
+    <thead>
+      <tr><th>Patient</th><th>Doctor</th><th>Time</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for a in todays_appointments %}
+      <tr>
+        <td>{{ a.patient.full_name }}</td>
+        <td>Dr. {{ a.doctor.full_name }}</td>
+        <td>{{ a.appointment_time }}</td>
+        <td><span class="badge badge-{{ a.status.lower().replace('-', '') }}">{{ a.status }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-state">No appointments today.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div style="margin-top:20px;">
+  <a href="{{ url_for('patients.list_patients') }}" class="btn btn-outline">View All Patients</a>
+</div>
+
+{% endblock %}

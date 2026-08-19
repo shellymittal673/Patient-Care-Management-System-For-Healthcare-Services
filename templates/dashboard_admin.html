@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+
+<h2 class="page-title">Welcome, {{ current_user.full_name.split(' ')[0] }}!</h2>
+<p class="page-sub">Here's what's happening in your hospital today.</p>
+
+<div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+  <div class="stat-card" style="display:flex; align-items:center; gap:14px;">
+    <div style="width:44px; height:44px; border-radius:50%; background:var(--admin-soft); color:var(--admin);
+                display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex:none;">&#128101;</div>
+    <div>
+      <div class="label">Total Patients</div>
+      <div class="num">{{ total_patients }}</div>
+      <a href="{{ url_for('patients.list_patients') }}" style="font-size:0.75rem; font-weight:600;">View Details</a>
+    </div>
+  </div>
+  <div class="stat-card" style="display:flex; align-items:center; gap:14px;">
+    <div style="width:44px; height:44px; border-radius:50%; background:var(--doctor-soft); color:var(--doctor);
+                display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex:none;">&#9877;</div>
+    <div>
+      <div class="label">Total Doctors</div>
+      <div class="num">{{ total_doctors }}</div>
+      <a href="{{ url_for('doctors.list_doctors') }}" style="font-size:0.75rem; font-weight:600;">View Details</a>
+    </div>
+  </div>
+  <div class="stat-card" style="display:flex; align-items:center; gap:14px;">
+    <div style="width:44px; height:44px; border-radius:50%; background:var(--patient-soft); color:var(--patient);
+                display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex:none;">&#128197;</div>
+    <div>
+      <div class="label">Today's Appointments</div>
+      <div class="num">{{ todays_appointments_count }}</div>
+      <a href="{{ url_for('appointments.list_appointments') }}" style="font-size:0.75rem; font-weight:600;">View Details</a>
+    </div>
+  </div>
+</div>
+
+<div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+  <div class="stat-card" style="display:flex; align-items:center; gap:14px;">
+    <div style="width:44px; height:44px; border-radius:50%; background:var(--nurse-soft); color:var(--nurse);
+                display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex:none;">&#128172;</div>
+    <div>
+      <div class="label">Completed Consultations</div>
+      <div class="num">{{ completed_consultations }}</div>
+      <a href="{{ url_for('consultations.list_consultations') }}" style="font-size:0.75rem; font-weight:600;">View Details</a>
+    </div>
+  </div>
+  <div class="stat-card" style="display:flex; align-items:center; gap:14px;">
+    <div style="width:44px; height:44px; border-radius:50%; background:#fdecea; color:#b0362a;
+                display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex:none;">&#10060;</div>
+    <div>
+      <div class="label">Cancelled Appointments</div>
+      <div class="num">{{ cancelled_appointments }}</div>
+      <a href="{{ url_for('appointments.list_appointments') }}" style="font-size:0.75rem; font-weight:600;">View Details</a>
+    </div>
+  </div>
+  <div class="stat-card" style="display:flex; align-items:center; gap:14px;">
+    <div style="width:44px; height:44px; border-radius:50%; background:#e2f6f3; color:#0f8a7a;
+                display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex:none;">&#129514;</div>
+    <div>
+      <div class="label">Pending Lab Reports</div>
+      <div class="num">{{ pending_lab_reports }}</div>
+      <a href="{{ url_for('lab.dashboard') }}" style="font-size:0.75rem; font-weight:600;">View Details</a>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-head"><h3>Monthly Patient Registrations (This Year)</h3></div>
+    <canvas id="regChart" height="180"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Appointment Trends (Last 7 Days)</h3></div>
+    <canvas id="apptChart" height="180"></canvas>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-head"><h3>Doctor-wise Consultation Count</h3></div>
+    <canvas id="docChart" height="180"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Patient Demographics</h3></div>
+    <canvas id="demoChart" height="180"></canvas>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-head"><h3>Revenue Summary (Paid Bills)</h3></div>
+    <div class="stat-card" style="box-shadow:none; border:none; padding:6px 0;">
+      <div class="num" style="color:var(--doctor); font-size:2.2rem;">₹{{ '{:,.2f}'.format(total_revenue) }}</div>
+      <div class="label">Total revenue collected to date</div>
+    </div>
+    <a href="{{ url_for('billing.list_bills') }}" style="font-size:0.8rem; font-weight:600;">View Billing History &rarr;</a>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Recent System Activity</h3></div>
+    <div style="max-height:220px; overflow-y:auto;">
+      {% for a in recent_activity %}
+      <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--line-soft); font-size:0.8rem;">
+        <span style="color:var(--admin); flex:none;">&#9679;</span>
+        <div>
+          <strong>{{ a.action }}</strong> — {{ a.description }}
+          <div style="color:var(--ink-faint); font-size:0.72rem;">{{ a.created_at.strftime('%d %b, %I:%M %p') }}</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">No activity logged yet — actions across the system will appear here.</div>
+      {% endfor %}
+    </div>
+    <a href="{{ url_for('system_integration.overview') }}" style="font-size:0.8rem; font-weight:600;">View System Integration &rarr;</a>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-head"><h3>Recent Patient Registrations</h3></div>
+    <table>
+      <thead><tr><th>ID</th><th>Patient Name</th><th>Registered On</th></tr></thead>
+      <tbody>
+        {% for p in recent_patients %}
+        <tr>
+          <td>P{{ '%03d'|format(p.id) }}</td>
+          <td>{{ p.full_name }}</td>
+          <td>{{ p.registration_date }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="empty-state">No patients yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="{{ url_for('patients.list_patients') }}" style="font-size:0.8rem; font-weight:600;">View All Patients &rarr;</a>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Today's Appointments</h3></div>
+    <table>
+      <thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for a in todays_appointments %}
+        <tr>
+          <td>A{{ '%03d'|format(a.id) }}</td>
+          <td>{{ a.patient.full_name }}</td>
+          <td>Dr. {{ a.doctor.full_name }}</td>
+          <td>{{ a.appointment_time }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty-state">No appointments today.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="{{ url_for('appointments.list_appointments') }}" style="font-size:0.8rem; font-weight:600;">View All Appointments &rarr;</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Quick Actions</h3></div>
+  <div class="grid-2" style="grid-template-columns:repeat(4,1fr); gap:12px;">
+    <a href="{{ url_for('patients.new_patient') }}" class="btn btn-primary" style="width:100%;">&#128100; Add New Patient</a>
+    <a href="{{ url_for('doctors.list_doctors') }}" class="btn btn-green" style="width:100%;">&#9877; Add New Doctor</a>
+    <a href="{{ url_for('appointments.new_appointment') }}" class="btn" style="width:100%; background:var(--nurse); color:#fff;">&#128197; New Appointment</a>
+    <a href="{{ url_for('reports_extra.hub') }}" class="btn" style="width:100%; background:var(--patient); color:#fff;">&#128196; Generate Report</a>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  new Chart(document.getElementById('regChart'), {
+    type: 'bar',
+    data: { labels: {{ reg_labels|tojson }}, datasets: [{ label: 'New Patients', data: {{ reg_counts|tojson }}, backgroundColor: '#2f5fd6' }] },
+    options: { plugins: { legend: { display: true, position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+
+  new Chart(document.getElementById('apptChart'), {
+    type: 'line',
+    data: { labels: {{ chart_labels|tojson }}, datasets: [{ label: 'Appointments', data: {{ chart_counts|tojson }},
+      borderColor: '#2f5fd6', backgroundColor: 'rgba(47,95,214,0.1)', fill: true, tension: 0.35, pointBackgroundColor: '#2f5fd6' }] },
+    options: { plugins: { legend: { display: true, position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+
+  new Chart(document.getElementById('docChart'), {
+    type: 'bar',
+    data: { labels: {{ doc_labels|tojson }}, datasets: [{ label: 'Consultations', data: {{ doc_counts|tojson }}, backgroundColor: '#1f9d63' }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+
+  new Chart(document.getElementById('demoChart'), {
+    type: 'pie',
+    data: { labels: {{ demo_labels|tojson }}, datasets: [{ data: {{ demo_counts|tojson }}, backgroundColor: ['#2f5fd6', '#e07a1f', '#7c4fd6', '#1f9d63'] }] },
+    options: { plugins: { legend: { display: true, position: 'right' } } }
+  });
+</script>
+
+{% endblock %}

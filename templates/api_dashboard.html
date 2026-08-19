@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}REST API Management{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / REST API Management</div>
+<h2 class="page-title">&#9729; REST API Dashboard</h2>
+<p class="page-sub">Live endpoint tester — requests below hit the real API and measure actual response time.</p>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="num">{{ endpoints|length }}</div><div class="label">Total APIs</div></div>
+  <div class="stat-card"><div class="num" id="statActive">—</div><div class="label">Active APIs</div></div>
+  <div class="stat-card"><div class="num" id="statAvg">—</div><div class="label">Average Response Time</div></div>
+  <div class="stat-card"><div class="num" id="statSuccess">—</div><div class="label">Success Rate</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-head"><h3>API Endpoints</h3><button onclick="testAllEndpoints()" class="btn btn-outline btn-sm">&#9654; Test All</button></div>
+    <table>
+      <thead><tr><th>#</th><th>API Name</th><th>Endpoint</th><th>Methods</th><th>Status</th><th>Response Time</th></tr></thead>
+      <tbody id="endpointRows">
+        {% for e in endpoints %}
+        <tr data-path="{{ e.path }}">
+          <td>{{ loop.index }}</td>
+          <td>{{ e.name }}</td>
+          <td><code>{{ e.path }}</code></td>
+          <td>{{ e.methods }}</td>
+          <td class="ep-status"><span class="badge badge-noshow">Untested</span></td>
+          <td class="ep-time">—</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Live API Test</h3></div>
+    <label>Select Endpoint</label>
+    <select id="testEndpoint">
+      {% for e in endpoints %}
+      <option value="{{ e.path }}">GET {{ e.path }}</option>
+      {% endfor %}
+    </select>
+    <button onclick="sendTestRequest()" class="btn btn-primary" style="margin-top:12px;">&#9654; Send Request</button>
+
+    <div style="margin-top:16px;" class="grid-3">
+      <div class="stat-card" style="padding:10px;"><div class="num" id="respStatus" style="font-size:1.1rem;">—</div><div class="label">Status</div></div>
+      <div class="stat-card" style="padding:10px;"><div class="num" id="respTime" style="font-size:1.1rem;">—</div><div class="label">Time (ms)</div></div>
+      <div class="stat-card" style="padding:10px;"><div class="num" id="respSize" style="font-size:1.1rem;">—</div><div class="label">Size (KB)</div></div>
+    </div>
+
+    <label style="margin-top:12px;">Response</label>
+    <pre id="respBody" style="background:#0c2032; color:#d7e4ee; padding:14px; border-radius:9px; font-size:0.76rem; max-height:260px; overflow:auto;">Click "Send Request" to see live JSON response...</pre>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Response Time (measured live)</h3></div>
+  <canvas id="respChart" height="90"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+let chart;
+const chartLabels = [];
+const chartData = [];
+
+function initChart(){
+  const ctx = document.getElementById('respChart');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: chartLabels, datasets: [{ label: 'Response Time (ms)', data: chartData,
+      borderColor:'#2f5fd6', backgroundColor:'rgba(47,95,214,.1)', fill:true, tension:.3 }] },
+    options: { plugins:{ legend:{ display:true, position:'bottom' } }, scales:{ y:{ beginAtZero:true } } }
+  });
+}
+
+async function callEndpoint(path){
+  const start = performance.now();
+  let status, size = 0, body = null, ok = false;
+  try{
+    const res = await fetch(path, { headers: {'Accept':'application/json'} });
+    status = res.status;
+    const text = await res.text();
+    size = new Blob([text]).size;
+    try { body = JSON.parse(text); } catch(e){ body = text; }
+    ok = res.ok;
+  } catch(e){
+    status = 0; body = {error: e.message};
+  }
+  const time = Math.round(performance.now() - start);
+  return { status, time, size, body, ok };
+}
+
+async function sendTestRequest(){
+  const path = document.getElementById('testEndpoint').value;
+  document.getElementById('respBody').textContent = 'Loading...';
+  const result = await callEndpoint(path);
+  document.getElementById('respStatus').textContent = result.status + (result.ok ? ' OK' : '');
+  document.getElementById('respTime').textContent = result.time;
+  document.getElementById('respSize').textContent = (result.size / 1024).toFixed(2);
+  document.getElementById('respBody').textContent = JSON.stringify(result.body, null, 2);
+
+  chartLabels.push(new Date().toLocaleTimeString());
+  chartData.push(result.time);
+  if (chartLabels.length > 12){ chartLabels.shift(); chartData.shift(); }
+  chart.update();
+
+  const row = document.querySelector(`tr[data-path="${path}"]`);
+  if (row){
+    row.querySelector('.ep-status').innerHTML = result.ok
+      ? '<span class="badge badge-completed">Active</span>'
+      : '<span class="badge badge-cancelled">Error</span>';
+    row.querySelector('.ep-time').textContent = result.time + ' ms';
+  }
+  updateSummary();
+}
+
+async function testAllEndpoints(){
+  const rows = document.querySelectorAll('#endpointRows tr');
+  for (const row of rows){
+    const path = row.dataset.path;
+    const result = await callEndpoint(path);
+    row.querySelector('.ep-status').innerHTML = result.ok
+      ? '<span class="badge badge-completed">Active</span>'
+      : '<span class="badge badge-cancelled">Error</span>';
+    row.querySelector('.ep-time').textContent = result.time + ' ms';
+    chartLabels.push(new Date().toLocaleTimeString());
+    chartData.push(result.time);
+    if (chartLabels.length > 12){ chartLabels.shift(); chartData.shift(); }
+  }
+  chart.update();
+  updateSummary();
+}
+
+function updateSummary(){
+  const times = Array.from(document.querySelectorAll('.ep-time')).map(td => parseInt(td.textContent)).filter(n => !isNaN(n));
+  const statuses = Array.from(document.querySelectorAll('.ep-status .badge'));
+  const activeCount = statuses.filter(b => b.textContent === 'Active').length;
+  const testedCount = statuses.filter(b => b.textContent !== 'Untested').length;
+
+  document.getElementById('statActive').textContent = activeCount;
+  document.getElementById('statAvg').textContent = times.length ? Math.round(times.reduce((a,b)=>a+b,0)/times.length) + ' ms' : '—';
+  document.getElementById('statSuccess').textContent = testedCount ? Math.round((activeCount/testedCount)*100) + '%' : '—';
+}
+
+initChart();
+</script>
+{% endblock %}

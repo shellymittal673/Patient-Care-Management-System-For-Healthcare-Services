@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Reports & Search{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Reports &amp; Search</div>
+<h2 class="page-title">&#128269; Reports &amp; Search</h2>
+<p class="page-sub">Generated on {{ generated_on }}</p>
+
+<div class="card">
+  <form method="GET" action="{{ url_for('dashboard.reports') }}" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+    <div style="min-width:140px;">
+      <label>Search By</label>
+      <select name="search_by">
+        <option value="id" {% if search_by == 'id' %}selected{% endif %}>Patient ID</option>
+        <option value="name" {% if search_by == 'name' %}selected{% endif %}>Patient Name</option>
+      </select>
+    </div>
+    <div style="flex:1; min-width:200px;">
+      <label>&nbsp;</label>
+      <input type="text" name="search_value" value="{{ search_value }}" placeholder="e.g. P1001 or Rahul Kumar">
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-bottom:0;">&#128269; Search</button>
+  </form>
+
+  {% if searched %}
+    {% if found_patient %}
+    <div class="flash success" style="margin-top:16px;">
+      &#9989; <strong>Patient Found</strong> — {{ found_patient.full_name }} (P{{ '%04d'|format(found_patient.id) }})
+    </div>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <a href="{{ url_for('patients.view_patient', patient_id=found_patient.id) }}" class="btn btn-outline">View Full Profile</a>
+      <a href="{{ url_for('dashboard.patient_report', patient_id=found_patient.id) }}" class="btn btn-primary">&#128196; Generate Report</a>
+    </div>
+    {% else %}
+    <div class="flash error" style="margin-top:16px;">No patient found matching "{{ search_value }}".</div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="num">{{ total_patients }}</div><div class="label">Total Patients</div></div>
+  <div class="stat-card"><div class="num">{{ total_doctors }}</div><div class="label">Total Doctors</div></div>
+  <div class="stat-card"><div class="num">{{ total_nurses }}</div><div class="label">Total Nurses</div></div>
+  <div class="stat-card"><div class="num">{{ total_appointments }}</div><div class="label">Total Appointments</div></div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Appointment Status Breakdown</h3></div>
+  <table>
+    <thead><tr><th>Status</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-scheduled">Scheduled</span></td><td>{{ scheduled }}</td></tr>
+      <tr><td><span class="badge badge-completed">Completed</span></td><td>{{ completed }}</td></tr>
+      <tr><td><span class="badge badge-cancelled">Cancelled</span></td><td>{{ cancelled }}</td></tr>
+      <tr><td><span class="badge badge-noshow">No-show</span></td><td>{{ no_show }}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<button onclick="window.print()" class="btn btn-primary">&#128424; Print / Save as PDF</button>
+{% endblock %}

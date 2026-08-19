@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Billing &amp; Payment{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Billing &amp; Payment</div>
+<div class="card-head">
+  <h2 class="page-title" style="margin-bottom:0;">&#128179; Billing History</h2>
+  {% if current_user.role in ['admin', 'nurse'] %}
+  <a href="{{ url_for('billing.new_bill') }}" class="btn btn-green">+ New Bill</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Bill ID</th><th>Patient</th><th>Bill Date</th><th>Total Amount (₹)</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for b in bills %}
+      <tr>
+        <td>BILL{{ '%04d'|format(b.id) }}</td>
+        <td>{{ b.patient.full_name }}</td>
+        <td>{{ b.bill_date }}</td>
+        <td>{{ '%.2f'|format(b.total_amount) }}</td>
+        <td>
+          {% if b.payment_status == 'Paid' %}<span class="badge badge-completed">Paid</span>
+          {% elif b.payment_status == 'Unpaid' %}<span class="badge badge-cancelled">Unpaid</span>
+          {% else %}<span class="badge badge-noshow">{{ b.payment_status }}</span>{% endif %}
+        </td>
+        <td><a href="{{ url_for('billing.view_bill', bill_id=b.id) }}" class="btn btn-view btn-sm">&#128065; View</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="empty-state">No bills generated yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

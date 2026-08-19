@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Invoice #{{ bill.id }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('billing.list_bills') }}">Billing &amp; Payment</a> / Invoice</div>
+
+<div class="card-head">
+  <h2 class="page-title" style="margin-bottom:0;">Invoice</h2>
+  <button onclick="window.print()" class="btn btn-primary">&#128424; Print Invoice</button>
+</div>
+
+<div class="flash success">Payment recorded successfully! Invoice generated successfully.</div>
+
+<div class="card" style="max-width:640px; margin:0 auto;">
+  <div style="text-align:center; font-weight:700; color:var(--admin); font-size:1.1rem;">&#10010; City Care Hospital</div>
+  <div style="text-align:center; color:var(--ink-soft); font-size:0.78rem; margin-bottom:6px;">
+    123, Health Street, Chennai — 600001<br>Ph: 044-12345678 &nbsp;|&nbsp; Email: info@citycare.com
+  </div>
+  <div style="text-align:center; font-weight:700; letter-spacing:0.06em; margin-bottom:14px;">INVOICE</div>
+
+  <table class="info-table" style="margin-bottom:14px;">
+    <tr><td>Bill ID</td><td>BILL{{ '%04d'|format(bill.id) }}</td></tr>
+    <tr><td>Patient ID</td><td>PAT{{ '%04d'|format(bill.patient.id) }}</td></tr>
+    <tr><td>Patient Name</td><td>{{ bill.patient.full_name }}</td></tr>
+    <tr><td>Age / Gender</td><td>{{ bill.patient.age or '—' }} Yrs / {{ bill.patient.gender or '—' }}</td></tr>
+    <tr><td>Bill Date</td><td>{{ bill.bill_date }}</td></tr>
+    <tr><td>Payment Status</td><td>
+      {% if bill.payment_status == 'Paid' %}<span class="badge badge-completed">Paid</span>
+      {% elif bill.payment_status == 'Unpaid' %}<span class="badge badge-cancelled">Unpaid</span>
+      {% else %}<span class="badge badge-noshow">{{ bill.payment_status }}</span>{% endif %}
+    </td></tr>
+  </table>
+
+  <table style="margin-bottom:14px;">
+    <thead><tr><th>#</th><th>Description</th><th>Amount (₹)</th></tr></thead>
+    <tbody>
+      {% for item in bill.items %}
+      <tr><td>{{ loop.index }}</td><td>{{ item.description }} ({{ item.reference_id }})</td><td>{{ '%.2f'|format(item.amount) }}</td></tr>
+      {% else %}
+      <tr><td colspan="3" class="empty-state">No items listed.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="info-table" style="margin-bottom:14px;">
+    <tr><td>Sub Total</td><td>₹{{ '%.2f'|format(bill.sub_total) }}</td></tr>
+    <tr><td>Discount</td><td>₹{{ '%.2f'|format(bill.discount) }}</td></tr>
+    <tr><td>Tax</td><td>₹{{ '%.2f'|format(bill.tax) }}</td></tr>
+    <tr><td><strong>Total Amount</strong></td><td><strong style="color:var(--primary); font-size:1.05rem;">₹{{ '%.2f'|format(bill.total_amount) }}</strong></td></tr>
+  </table>
+
+  {% if bill.payment_method %}
+  <div style="font-size:0.85rem; color:var(--ink-soft); margin-bottom:6px;">
+    Payment Method: <strong style="color:var(--ink);">{{ bill.payment_method }}</strong>
+    {% if bill.transaction_id %} &nbsp;|&nbsp; Transaction ID: <strong style="color:var(--ink);">{{ bill.transaction_id }}</strong>{% endif %}
+  </div>
+  {% endif %}
+
+  <div style="text-align:center; margin-top:16px; font-size:0.8rem; color:var(--ink-soft);">
+    Thank you for choosing City Care Hospital.<br>
+    <em>Care with Compassion.</em>
+  </div>
+</div>
+
+<div style="text-align:center; margin-top:16px;">
+  <a href="{{ url_for('billing.list_bills') }}" class="btn btn-outline">&#8592; Back to Billing History</a>
+</div>
+{% endblock %}

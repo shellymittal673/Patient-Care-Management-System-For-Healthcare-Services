@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Consultation Management{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('consultations.list_consultations') }}">Consultations</a> / Add Consultation</div>
+<h2 class="page-title">&#128203; Consultation Management</h2>
+
+<div class="card">
+  <h3 style="margin-top:0; color:var(--admin); font-size:0.95rem;">Patient Consultation Form</h3>
+  <form method="POST">
+    <div class="grid-2">
+      <div>
+        <label>Patient Name *</label>
+        <select name="patient_id" required>
+          <option value="">Select patient</option>
+          {% for p in patients %}
+          <option value="{{ p.id }}">{{ p.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Date of Consultation *</label>
+        <input type="date" name="consultation_date" id="consultDate" required>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <label>Doctor Name *</label>
+        <select name="doctor_id" required>
+          <option value="">Select doctor</option>
+          {% for d in doctors %}
+          <option value="{{ d.id }}">Dr. {{ d.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Diagnosis *</label>
+        <input type="text" name="diagnosis" placeholder="e.g. Viral Fever" required>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <label>Symptoms *</label>
+        <textarea name="symptoms" placeholder="e.g. Fever, Cough, Headache and Body Pain" required></textarea>
+      </div>
+      <div>
+        <label>Treatment / Prescription *</label>
+        <textarea name="treatment" placeholder="e.g. Paracetamol 500 mg - Twice a day" required></textarea>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:14px;">
+      <button type="submit" class="btn btn-green">&#128424; Save Consultation</button>
+      <button type="reset" class="btn btn-outline">Reset</button>
+    </div>
+  </form>
+</div>
+<script>document.getElementById('consultDate').valueAsDate = new Date();</script>
+{% endblock %}

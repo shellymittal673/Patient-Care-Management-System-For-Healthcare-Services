@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Prescriptions{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Prescriptions</div>
+<div class="card-head">
+  <h2 class="page-title" style="margin-bottom:0;">Prescriptions</h2>
+  {% if current_user.role in ['admin', 'doctor'] %}
+  <a href="{{ url_for('prescriptions.new_prescription') }}" class="btn btn-green">+ New Prescription</a>
+  {% endif %}
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Date</th><th>Patient</th><th>Doctor</th><th>Diagnosis</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for p in prescriptions %}
+      <tr>
+        <td>{{ p.prescription_date }}</td>
+        <td>{{ p.patient.full_name }}</td>
+        <td>Dr. {{ p.doctor.full_name }}</td>
+        <td>{{ p.diagnosis or '—' }}</td>
+        <td><a href="{{ url_for('prescriptions.view_prescription', prescription_id=p.id) }}" class="btn btn-view btn-sm">View</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">No prescriptions yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Patient Billing{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('billing.list_bills') }}">Billing &amp; Payment</a> / New Bill</div>
+<h2 class="page-title">&#128179; Patient Billing</h2>
+
+<div class="card">
+  <form method="GET">
+    <div class="grid-3">
+      <div>
+        <label>Patient ID</label>
+        <select name="patient_id" onchange="this.form.submit()">
+          <option value="">Select patient</option>
+          {% for p in patients %}
+          <option value="{{ p.id }}" {% if patient and patient.id == p.id %}selected{% endif %}>PAT{{ '%04d'|format(p.id) }} — {{ p.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if patient %}
+      <div><label>Patient Name</label><input type="text" value="{{ patient.full_name }}" disabled></div>
+      <div><label>Age / Gender</label><input type="text" value="{{ patient.age or '—' }} Yrs / {{ patient.gender or '—' }}" disabled></div>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+{% if patient %}
+<form method="POST" action="{{ url_for('billing.create_bill') }}">
+  <input type="hidden" name="patient_id" value="{{ patient.id }}">
+
+  <div class="card">
+    <div class="card-head"><h3>Bill Details</h3></div>
+    <table>
+      <thead><tr><th></th><th>#</th><th>Service Type</th><th>Description</th><th>Reference ID</th><th>Date</th><th>Amount (₹)</th></tr></thead>
+      <tbody>
+        {% for item in billable_items %}
+        <tr>
+          <td><input type="checkbox" name="item_ref[]" value="{{ item.ref }}" checked style="width:auto;"></td>
+          <td>{{ loop.index }}</td>
+          <td>{{ item.type }}</td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.ref }}</td>
+          <td>{{ item.date }}</td>
+          <td>{{ '%.2f'|format(item.amount) }}
+            <input type="hidden" name="item_ref_all[]" value="{{ item.ref }}">
+            <input type="hidden" name="item_type[]" value="{{ item.type }}">
+            <input type="hidden" name="item_desc[]" value="{{ item.description }}">
+            <input type="hidden" name="item_amount[]" value="{{ item.amount }}">
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="empty-state">No unbilled services for this patient — everything has already been invoiced.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="grid-2" style="margin-top:14px;">
+      <div>
+        <label>Other Charges Description</label>
+        <input type="text" name="other_charges_desc" placeholder="e.g. Registration Charges">
+      </div>
+      <div>
+        <label>Other Charges Amount (₹)</label>
+        <input type="number" step="0.01" name="other_charges_amount" value="0">
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>Payment Details</h3></div>
+      <label>Payment Method</label>
+      <select name="payment_method" required>
+        <option>UPI</option><option>Cash</option><option>Card</option><option>Insurance</option>
+      </select>
+      <label>Transaction ID</label>
+      <input type="text" name="transaction_id" placeholder="e.g. UPI1234567890">
+      <div class="grid-2">
+        <div>
+          <label>Discount (₹)</label>
+          <input type="number" step="0.01" name="discount" value="0">
+        </div>
+        <div>
+          <label>Tax (₹)</label>
+          <input type="number" step="0.01" name="tax" value="0">
+        </div>
+      </div>
+      <label>Payment Status</label>
+      <select name="payment_status">
+        <option>Paid</option><option>Unpaid</option><option>Pending</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>City Care Hospital</h3></div>
+      <p class="page-sub" style="margin-bottom:6px;">123, Health Street, Chennai — 600001<br>Ph: 044-12345678 &nbsp;|&nbsp; Email: info@citycare.com</p>
+      <div class="flash success">Bill will be generated and saved once you submit this form.</div>
+      <button type="submit" class="btn btn-green" style="width:100%;">&#128190; Record Payment</button>
+    </div>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

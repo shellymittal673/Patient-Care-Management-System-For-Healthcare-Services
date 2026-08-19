@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}New Lab Test Request{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('lab.dashboard') }}">Lab Management</a> / New Request</div>
+<h2 class="page-title">Laboratory Test Request</h2>
+
+<div class="card" style="max-width:600px;">
+  <form method="POST">
+    <label>Patient *</label>
+    <select name="patient_id" required>
+      <option value="">Select patient</option>
+      {% for p in patients %}
+      <option value="{{ p.id }}">{{ p.full_name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Doctor *</label>
+    <select name="doctor_id" required>
+      <option value="">Select doctor</option>
+      {% for d in doctors %}
+      <option value="{{ d.id }}">Dr. {{ d.full_name }}</option>
+      {% endfor %}
+    </select>
+
+    <div class="grid-2">
+      <div>
+        <label>Test Type *</label>
+        <select name="test_type" required>
+          <option value="">Select test</option>
+          <option>Complete Blood Count (CBC)</option>
+          <option>Blood Sugar (Fasting)</option>
+          <option>Liver Function Test (LFT)</option>
+          <option>Kidney Function Test (KFT)</option>
+          <option>Lipid Profile</option>
+          <option>Thyroid Profile</option>
+          <option>Urine Test</option>
+          <option>X-Ray</option>
+          <option>MRI</option>
+        </select>
+      </div>
+      <div>
+        <label>Test Date *</label>
+        <input type="date" name="request_date" id="labDate" required>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:16px;">+ Create Test Request</button>
+  </form>
+</div>
+<script>document.getElementById('labDate').valueAsDate = new Date();</script>
+{% endblock %}

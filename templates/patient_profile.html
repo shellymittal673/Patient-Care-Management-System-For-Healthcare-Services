@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.full_name }} · Profile{% endblock %}
+{% block content %}
+
+<a href="{{ url_for('patients.list_patients') }}" style="font-size:13px; font-weight:600;">&larr; Back to Patient List</a>
+
+<div class="profile-head" style="margin-top:14px;">
+  <div>
+    <h2 class="page-title" style="margin-bottom:0;">Patient Profile</h2>
+  </div>
+  <div>
+    <a href="{{ url_for('ehr.view', patient_id=patient.id) }}" class="btn btn-primary btn-sm">&#128203; View EHR</a>
+    <a href="{{ url_for('patients.edit_patient', patient_id=patient.id) }}" class="btn btn-edit btn-sm">&#9998; Edit Profile</a>
+    {% if current_user.role == 'admin' %}
+    <form method="POST" action="{{ url_for('patients.delete_patient', patient_id=patient.id) }}"
+          style="display:inline;" onsubmit="return confirm('Delete this patient?');">
+      <button type="submit" class="btn btn-delete btn-sm">&#128465; Delete</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="card avatar-card">
+    <div class="avatar-circle">{{ patient.full_name[0] }}</div>
+    <div style="font-weight:700; font-size:1.05rem;">{{ patient.full_name }}</div>
+    <div style="color:var(--ink-soft); font-size:0.8rem; margin:2px 0 8px;">Patient ID: {{ patient.id }}</div>
+    <span class="badge badge-active">Active</span>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 10px; font-size:0.9rem; color:var(--admin);">Personal Information</h3>
+    <table class="info-table">
+      <tr><td>Full Name</td><td>{{ patient.full_name }}</td></tr>
+      <tr><td>Age</td><td>{{ patient.age or '—' }}</td></tr>
+      <tr><td>Gender</td><td>{{ patient.gender or '—' }}</td></tr>
+      <tr><td>Blood Group</td><td>{{ patient.blood_group or '—' }}</td></tr>
+      <tr><td>Phone Number</td><td>{{ patient.contact_number or '—' }}</td></tr>
+      <tr><td>Email</td><td>{{ patient.email or '—' }}</td></tr>
+      <tr><td>Address</td><td>{{ patient.address or '—' }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 10px; font-size:0.9rem; color:var(--doctor);">Medical Information</h3>
+    <table class="info-table">
+      <tr><td>Medical History</td><td>{{ patient.medical_history or 'No known allergies' }}</td></tr>
+      <tr><td>Chronic Diseases</td><td>{{ patient.chronic_diseases or 'None' }}</td></tr>
+      <tr><td>Current Medication</td><td>{{ patient.medications[0].medicine_name if patient.medications else 'None' }}</td></tr>
+      <tr><td>Registered On</td><td>{{ patient.registration_date }}</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Recent Appointments</h3></div>
+  <table>
+    <thead>
+      <tr><th>Appointment ID</th><th>Doctor Name</th><th>Date</th><th>Time</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for a in appointments %}
+      <tr>
+        <td>APT{{ '%03d'|format(a.id) }}</td>
+        <td>Dr. {{ a.doctor.full_name }}</td>
+        <td>{{ a.appointment_date }}</td>
+        <td>{{ a.appointment_time }}</td>
+        <td><span class="badge badge-{{ a.status.lower().replace('-', '') }}">{{ a.status }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">No appointments yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

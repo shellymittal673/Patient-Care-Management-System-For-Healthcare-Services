@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Testing &amp; Performance{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Performance &amp; Testing</div>
+<h2 class="page-title">&#9878; Testing &amp; Performance Optimization</h2>
+<p class="page-sub">Metrics below are computed from real requests logged by this running server — refresh a few pages, then reload this dashboard to see the numbers update.</p>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="num">{{ total_requests }}</div><div class="label">Requests Logged</div></div>
+  <div class="stat-card"><div class="num">{{ avg_response }} ms</div><div class="label">Average Response Time</div></div>
+  <div class="stat-card"><div class="num" style="color:{{ 'var(--doctor)' if error_rate < 2 else '#b0362a' }};">{{ error_rate }}%</div><div class="label">Error Rate</div></div>
+  <div class="stat-card"><div class="num">{{ uptime_str }}</div><div class="label">Uptime (this run)</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-head"><h3>Response Time Trend (Recent Requests)</h3></div>
+    <canvas id="trendChart" height="180"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Performance by Module</h3></div>
+    <table>
+      <thead><tr><th>Module</th><th>Avg Response</th><th>Requests</th></tr></thead>
+      <tbody>
+        {% for m in module_perf %}
+        <tr>
+          <td>{{ m.module }}</td>
+          <td>{{ m.avg_ms }} ms</td>
+          <td>{{ m.count }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="empty-state">No requests logged yet — browse the site a bit first.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="flash success">
+  These numbers reflect real traffic on this Flask process — every request is timed by a
+  before/after-request hook and stored in the <code>request_logs</code> table.
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: {{ trend_labels|tojson }},
+    datasets: [{ label: 'Response Time (ms)', data: {{ trend_values|tojson }},
+      borderColor:'#2f5fd6', backgroundColor:'rgba(47,95,214,.1)', fill:true, tension:.3 }]
+  },
+  options: { plugins:{ legend:{ display:true, position:'bottom' } }, scales:{ y:{ beginAtZero:true } } }
+});
+</script>
+{% endblock %}

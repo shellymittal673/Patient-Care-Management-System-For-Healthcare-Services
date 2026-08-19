@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Prescription #{{ prescription.id }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('prescriptions.list_prescriptions') }}">Prescriptions</a> / View</div>
+
+<div class="card-head">
+  <h2 class="page-title" style="margin-bottom:0;">Digital Prescription</h2>
+  <button onclick="window.print()" class="btn btn-green">&#128424; Print</button>
+</div>
+
+<div class="card" style="max-width:640px; margin:0 auto;">
+  <div style="text-align:center; font-weight:700; color:var(--admin); font-size:1.1rem;">City Care Hospital</div>
+  <div style="text-align:center; color:var(--ink-soft); font-size:0.78rem; margin-bottom:14px;">Electronic City, Bangalore, Karnataka 560100</div>
+  <div style="text-align:center; font-weight:700; letter-spacing:0.06em; margin-bottom:14px;">PRESCRIPTION</div>
+
+  <table class="info-table" style="margin-bottom:14px;">
+    <tr><td>Patient ID</td><td>PAT{{ '%04d'|format(prescription.patient.id) }}</td></tr>
+    <tr><td>Patient Name</td><td>{{ prescription.patient.full_name }}</td></tr>
+    <tr><td>Doctor Name</td><td>Dr. {{ prescription.doctor.full_name }}</td></tr>
+    <tr><td>Date</td><td>{{ prescription.prescription_date }}</td></tr>
+    <tr><td>Diagnosis</td><td>{{ prescription.diagnosis or '—' }}</td></tr>
+  </table>
+
+  <table style="margin-bottom:14px;">
+    <thead><tr><th>#</th><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th></tr></thead>
+    <tbody>
+      {% for item in prescription.items %}
+      <tr><td>{{ loop.index }}</td><td>{{ item.medicine_name }}</td><td>{{ item.dosage or '—' }}</td><td>{{ item.frequency or '—' }}</td><td>{{ item.duration or '—' }}</td></tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">No medicines listed.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="margin-bottom:16px;"><strong>Special Instructions:</strong> {{ prescription.special_instructions or 'None' }}</div>
+  <div style="text-align:right;">
+    <div style="font-weight:700;">Dr. {{ prescription.doctor.full_name }}</div>
+    <div style="font-size:0.78rem; color:var(--ink-soft);">{{ prescription.doctor.specialization or '' }}</div>
+  </div>
+  <div class="flash success" style="margin-top:16px; text-align:center;">This is a computer-generated prescription. No signature required.</div>
+</div>
+
+<div style="text-align:center; margin-top:16px;">
+  <a href="{{ url_for('prescriptions.new_prescription') }}" class="btn btn-primary">+ Add Another Prescription</a>
+</div>
+{% endblock %}

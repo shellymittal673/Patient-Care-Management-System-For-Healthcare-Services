@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Patient Search{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Patient Search</div>
+<h2 class="page-title">&#128269; Patient Search</h2>
+<p class="page-sub">Find a patient by ID, Name, Phone Number, Aadhaar Number, or Email.</p>
+
+<div class="card">
+  <form method="GET" class="grid-3" style="align-items:end;">
+    <div>
+      <label>Search By</label>
+      <select name="search_by">
+        <option value="name" {% if search_by == 'name' %}selected{% endif %}>Patient Name</option>
+        <option value="id" {% if search_by == 'id' %}selected{% endif %}>Patient ID</option>
+        <option value="phone" {% if search_by == 'phone' %}selected{% endif %}>Phone Number</option>
+        <option value="aadhaar" {% if search_by == 'aadhaar' %}selected{% endif %}>Aadhaar Number</option>
+        <option value="email" {% if search_by == 'email' %}selected{% endif %}>Email ID</option>
+      </select>
+    </div>
+    <div>
+      <label>Search Value</label>
+      <input type="text" name="query" value="{{ query }}" placeholder="e.g. Ravi Kumar" required>
+    </div>
+    <div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">&#128269; Search</button>
+    </div>
+  </form>
+</div>
+
+{% if searched %}
+<div class="card">
+  <div class="card-head"><h3>Results ({{ results|length }})</h3></div>
+  {% if results %}
+  <table>
+    <thead><tr><th>ID</th><th>Full Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Email</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for p in results %}
+      <tr>
+        <td>PAT{{ '%04d'|format(p.id) }}</td>
+        <td>{{ p.full_name }}</td>
+        <td>{{ p.age or '—' }}</td>
+        <td>{{ p.gender or '—' }}</td>
+        <td>{{ p.contact_number or '—' }}</td>
+        <td>{{ p.email or '—' }}</td>
+        <td class="action-links">
+          <a href="{{ url_for('patients.view_patient', patient_id=p.id) }}" class="btn btn-view btn-sm">View Profile</a>
+          <a href="{{ url_for('medical_history.view', patient_id=p.id) }}" class="btn btn-primary btn-sm">Medical History</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">No patient found matching that search. Try a different search type or check the spelling.</div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

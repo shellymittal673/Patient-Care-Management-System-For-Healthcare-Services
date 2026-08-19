@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Lab Report{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('lab.dashboard') }}">Lab Management</a> / Report</div>
+<h2 class="page-title">Laboratory Report Preview</h2>
+
+<div class="card" style="max-width:600px;">
+  <div style="text-align:center; font-weight:700; color:var(--admin);">City Care Hospital — Central Laboratory</div>
+  <div style="text-align:center; font-size:0.78rem; color:var(--ink-soft); margin-bottom:14px;">Report ID: LR{{ '%05d'|format(test.id) }}</div>
+
+  <table class="info-table" style="margin-bottom:14px;">
+    <tr><td>Patient Name</td><td>{{ test.patient.full_name }}</td></tr>
+    <tr><td>Referring Doctor</td><td>Dr. {{ test.doctor.full_name }}</td></tr>
+    <tr><td>Test Name</td><td>{{ test.test_type }}</td></tr>
+    <tr><td>Request Date</td><td>{{ test.request_date }}</td></tr>
+    <tr><td>Status</td><td>
+      {% if test.status == 'Completed' %}<span class="badge badge-completed">{{ test.status }}</span>
+      {% elif test.status == 'In Progress' %}<span class="badge badge-scheduled">{{ test.status }}</span>
+      {% else %}<span class="badge badge-noshow">{{ test.status }}</span>{% endif %}
+    </td></tr>
+    <tr><td>Result</td><td>{{ test.result_summary or 'Pending' }}</td></tr>
+    <tr><td>Remarks</td><td>{{ test.remarks or '—' }}</td></tr>
+  </table>
+
+  {% if test.report_filename %}
+  <a href="{{ url_for('static', filename='uploads/lab_reports/' ~ test.report_filename) }}" target="_blank" class="btn btn-primary">&#128196; Download Report File</a>
+  {% else %}
+  <div class="empty-state">No report file uploaded yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Administrative Reports{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Reports</div>
+<h2 class="page-title">&#128196; Administrative Reports</h2>
+<p class="page-sub">Generate, view, print, or export reports as CSV.</p>
+
+<div class="grid-3">
+  {% for r in report_types %}
+  <a href="{{ url_for('reports_extra.view_report', report_key=r.key) }}" class="card" style="text-decoration:none; color:inherit; display:block;">
+    <h3 style="margin:0 0 6px; font-size:0.95rem; color:var(--admin);">{{ r.name }}</h3>
+    <p class="page-sub" style="margin:0;">{{ r.desc }}</p>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

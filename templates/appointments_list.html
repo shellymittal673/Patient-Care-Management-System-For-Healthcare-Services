@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Appointments{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Appointments</div>
+
+<div class="card-head">
+  <div>
+    <h2 class="page-title" style="margin-bottom:0;">Appointments</h2>
+    <p class="page-sub" style="margin-bottom:0;">
+      {% if current_user.role == 'patient' %}Your appointment history{% else %}All scheduled appointments{% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('appointments.new_appointment') }}" class="btn btn-green">+ Book Appointment</a>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th>
+        {% if current_user.role in ['admin', 'doctor', 'nurse'] %}<th>Action</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in appointments %}
+      <tr>
+        <td>{{ a.patient.full_name }}</td>
+        <td>Dr. {{ a.doctor.full_name }}</td>
+        <td>{{ a.appointment_date }}</td>
+        <td>{{ a.appointment_time }}</td>
+        <td>{{ a.reason_for_visit or '—' }}</td>
+        <td><span class="badge badge-{{ a.status.lower().replace('-', '') }}">{{ a.status }}</span></td>
+        {% if current_user.role in ['admin', 'doctor', 'nurse'] %}
+        <td>
+          <form method="POST" action="{{ url_for('appointments.update_status', appointment_id=a.id) }}">
+            <select name="status" onchange="this.form.submit()" style="padding:4px 8px; font-size:0.75rem; width:auto;">
+              <option value="Scheduled" {% if a.status == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+              <option value="Completed" {% if a.status == 'Completed' %}selected{% endif %}>Completed</option>
+              <option value="Cancelled" {% if a.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+              <option value="No-show" {% if a.status == 'No-show' %}selected{% endif %}>No-show</option>
+            </select>
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty-state">No appointments found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

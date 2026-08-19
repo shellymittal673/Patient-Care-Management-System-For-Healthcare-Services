@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Login · Patient Care{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <h1 class="auth-title">Integrated Patient Care Management System</h1>
+  <p class="auth-sub">Please Login to Continue</p>
+
+  <div class="role-grid">
+
+    <!-- ADMIN -->
+    <form class="role-card" style="--accent:#2f5fd6; --accent-soft:#eaf0fd;" method="POST" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="role" value="admin">
+      <div class="rh">
+        <div class="ricon">&#128737;</div>
+        <div><div class="rname">Admin Login</div><div class="rtag">System Administrator</div></div>
+      </div>
+      <label>Email</label>
+      <div class="field-wrap">
+        <input type="email" name="email" placeholder="Enter admin email" required>
+        <span class="field-icon">&#9993;</span>
+      </div>
+      <label>Password</label>
+      <div class="field-wrap">
+        <input type="password" name="password" placeholder="Enter password" required>
+        <span class="field-icon">&#128274;</span>
+      </div>
+      <div class="role-row">
+        <label class="rem"><input type="checkbox" style="width:auto;"> Remember Me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+      <button type="submit" class="role-btn">&#128274; Login as Admin</button>
+      
+      <div class="role-signup">Don't have an account? <a href="#">Contact System Administrator</a></div>
+    </form>
+
+    <!-- DOCTOR -->
+    <form class="role-card" style="--accent:#1f9d63; --accent-soft:#e8f7ef;" method="POST" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="role" value="doctor">
+      <div class="rh">
+        <div class="ricon">&#9877;</div>
+        <div><div class="rname">Doctor Login</div><div class="rtag">Medical Practitioner</div></div>
+      </div>
+      <label>Email</label>
+      <div class="field-wrap">
+        <input type="email" name="email" placeholder="Enter doctor email" required>
+        <span class="field-icon">&#9993;</span>
+      </div>
+      <label>Password</label>
+      <div class="field-wrap">
+        <input type="password" name="password" placeholder="Enter password" required>
+        <span class="field-icon">&#128274;</span>
+      </div>
+      <div class="role-row">
+        <label class="rem"><input type="checkbox" style="width:auto;"> Remember Me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+      <button type="submit" class="role-btn">&#128274; Login as Doctor</button>
+      
+      <div class="role-signup">Don't have an account? <a href="#">Contact Administrator</a></div>
+    </form>
+
+    <!-- NURSE -->
+    <form class="role-card" style="--accent:#7c4fd6; --accent-soft:#f2ecfc;" method="POST" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="role" value="nurse">
+      <div class="rh">
+        <div class="ricon">&#128147;</div>
+        <div><div class="rname">Nurse Login</div><div class="rtag">Nursing Staff</div></div>
+      </div>
+      <label>Email</label>
+      <div class="field-wrap">
+        <input type="email" name="email" placeholder="Enter nurse email" required>
+        <span class="field-icon">&#9993;</span>
+      </div>
+      <label>Password</label>
+      <div class="field-wrap">
+        <input type="password" name="password" placeholder="Enter password" required>
+        <span class="field-icon">&#128274;</span>
+      </div>
+      <div class="role-row">
+        <label class="rem"><input type="checkbox" style="width:auto;"> Remember Me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+      <button type="submit" class="role-btn">&#128274; Login as Nurse</button>
+     
+      <div class="role-signup">Don't have an account? <a href="#">Contact Administrator</a></div>
+    </form>
+
+    <!-- PATIENT -->
+    <form class="role-card" style="--accent:#e07a1f; --accent-soft:#fdf1e4;" method="POST" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="role" value="patient">
+      <div class="rh">
+        <div class="ricon">&#128100;</div>
+        <div><div class="rname">Patient Login</div><div class="rtag">Registered Patient</div></div>
+      </div>
+      <label>Email</label>
+      <div class="field-wrap">
+        <input type="email" name="email" placeholder="Enter patient email" required>
+        <span class="field-icon">&#9993;</span>
+      </div>
+      <label>Password</label>
+      <div class="field-wrap">
+        <input type="password" name="password" placeholder="Enter password" required>
+        <span class="field-icon">&#128274;</span>
+      </div>
+      <div class="role-row">
+        <label class="rem"><input type="checkbox" style="width:auto;"> Remember Me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+      <button type="submit" class="role-btn">&#128274; Login as Patient</button>
+      
+      <div class="role-signup">Don't have an account? <a href="{{ url_for('auth.register') }}">Register Here</a></div>
+    </form>
+
+    <!-- PHARMACIST -->
+    <form class="role-card" style="--accent:#0f8a7a; --accent-soft:#e2f6f3;" method="POST" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="role" value="pharmacist">
+      <div class="rh">
+        <div class="ricon">&#128137;</div>
+        <div><div class="rname">Pharmacist Login</div><div class="rtag">Pharmacy Dept.</div></div>
+      </div>
+      <label>Email</label>
+      <div class="field-wrap">
+        <input type="email" name="email" placeholder="Enter pharmacist email" required>
+        <span class="field-icon">&#9993;</span>
+      </div>
+      <label>Password</label>
+      <div class="field-wrap">
+        <input type="password" name="password" placeholder="Enter password" required>
+        <span class="field-icon">&#128274;</span>
+      </div>
+      <div class="role-row">
+        <label class="rem"><input type="checkbox" style="width:auto;"> Remember Me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+      <button type="submit" class="role-btn">&#128274; Login as Pharmacist</button>
+      
+      <div class="role-signup">Don't have an account? <a href="#">Contact Administrator</a></div>
+    </form>
+
+  </div>
+
+  </div>
+</div>
+{% endblock %}

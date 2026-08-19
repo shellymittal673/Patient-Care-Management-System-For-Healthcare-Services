@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if doctor else 'Add' }} Doctor{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('doctors.list_doctors') }}">Doctors</a> / {{ 'Edit' if doctor else 'Add Doctor' }}</div>
+
+<div class="card">
+  <div class="card-head"><h3>{{ 'Edit Doctor' if doctor else 'Add New Doctor' }}</h3></div>
+  <form method="POST">
+    <div class="grid-2">
+      <div>
+        <label>Full Name *</label>
+        <input type="text" name="full_name" required value="{{ doctor.full_name if doctor else '' }}">
+      </div>
+      <div>
+        <label>Specialization</label>
+        <input type="text" name="specialization" value="{{ doctor.specialization if doctor else '' }}">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <label>Qualification</label>
+        <input type="text" name="qualification" value="{{ doctor.qualification if doctor else '' }}">
+      </div>
+      <div>
+        <label>Department</label>
+        <input type="text" name="department" value="{{ doctor.department if doctor else '' }}">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <label>Hospital Branch</label>
+        <input type="text" name="hospital_branch" value="{{ doctor.hospital_branch if doctor else '' }}">
+      </div>
+      <div>
+        <label>Phone Number</label>
+        <input type="text" name="phone_number" value="{{ doctor.phone_number if doctor else '' }}">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <label>Email</label>
+        <input type="email" name="email" value="{{ doctor.email if doctor else '' }}">
+      </div>
+      <div>
+        <label>Years of Experience</label>
+        <input type="number" name="years_experience" min="0" value="{{ doctor.years_experience if doctor else '' }}">
+      </div>
+    </div>
+    <label>Available Time</label>
+    <input type="text" name="available_time" placeholder="e.g. Mon-Fri 9am-4pm" value="{{ doctor.available_time if doctor else '' }}">
+
+    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:18px;">
+      {{ 'Update Doctor' if doctor else 'Add Doctor' }}
+    </button>
+  </form>
+</div>
+{% endblock %}

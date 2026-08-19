@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Patient Care Management System{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<div class="app-header">
+  <div class="brand"><span class="logo">+</span> Patient Care Management System For Healthcare Services</div>
+  <div class="userbox">
+    <span>Welcome, {{ current_user.full_name.split(' ')[0] }} ({{ current_user.role|capitalize }})</span>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="{{ 'app-shell' if current_user.is_authenticated else 'auth-shell' }}">
+  {% if current_user.is_authenticated %}
+  <div class="sidebar">
+    <a href="{{ url_for('dashboard.home') }}" class="{{ 'active' if request.endpoint == 'dashboard.home' }}">
+      <span class="icon">&#9635;</span> Dashboard
+    </a>
+    <a href="{{ url_for('doctors.list_doctors') }}" class="{{ 'active' if request.blueprint == 'doctors' }}">
+      <span class="icon">&#9877;</span> Doctors
+    </a>
+    {% if current_user.role in ['admin', 'doctor', 'nurse'] %}
+    <a href="{{ url_for('patients.list_patients') }}" class="{{ 'active' if request.blueprint == 'patients' }}">
+      <span class="icon">&#128100;</span> Patients
+    </a>
+    {% endif %}
+    <a href="{{ url_for('appointments.list_appointments') }}" class="{{ 'active' if request.blueprint == 'appointments' }}">
+      <span class="icon">&#128197;</span> Appointments
+    </a>
+    <a href="{{ url_for('search.patient_search') }}" class="{{ 'active' if request.blueprint == 'search' }}">
+      <span class="icon">&#128269;</span> Patient Search
+    </a>
+    <a href="{{ url_for('ehr.list_ehr') }}" class="{{ 'active' if request.blueprint == 'ehr' }}">
+      <span class="icon">&#128203;</span> EHR / Medical Records
+    </a>
+    <a href="{{ url_for('consultations.list_consultations') }}" class="{{ 'active' if request.blueprint == 'consultations' }}">
+      <span class="icon">&#128172;</span> Consultations
+    </a>
+    <a href="{{ url_for('prescriptions.list_prescriptions') }}" class="{{ 'active' if request.blueprint == 'prescriptions' }}">
+      <span class="icon">&#128138;</span> Prescriptions
+    </a>
+    <a href="{{ url_for('lab.dashboard') }}" class="{{ 'active' if request.blueprint == 'lab' }}">
+      <span class="icon">&#129514;</span> Lab Management
+    </a>
+    <a href="{{ url_for('pharmacy.dashboard') }}" class="{{ 'active' if request.blueprint == 'pharmacy' }}">
+      <span class="icon">&#128137;</span> Pharmacy
+    </a>
+    <a href="{{ url_for('billing.list_bills') }}" class="{{ 'active' if request.blueprint == 'billing' }}">
+      <span class="icon">&#128179;</span> Billing &amp; Payment
+    </a>
+    <a href="{{ url_for('medical_history.list_patients') }}" class="{{ 'active' if request.blueprint == 'medical_history' }}">
+      <span class="icon">&#128209;</span> Medical History
+    </a>
+    <a href="{{ url_for('notifications.dashboard') }}" class="{{ 'active' if request.blueprint == 'notifications' }}">
+      <span class="icon">&#128276;</span> Notifications
+    </a>
+    <a href="{{ url_for('feedback.list_feedback') }}" class="{{ 'active' if request.blueprint == 'feedback' }}">
+      <span class="icon">&#11088;</span> Feedback
+    </a>
+    {% if current_user.role in ['admin', 'doctor'] %}
+    <a href="{{ url_for('reports_extra.hub') }}" class="{{ 'active' if request.blueprint == 'reports_extra' }}">
+      <span class="icon">&#128196;</span> Reports
+    </a>
+    {% endif %}
+    {% if current_user.role == 'admin' %}
+    <a href="{{ url_for('api_dashboard.dashboard') }}" class="{{ 'active' if request.blueprint == 'api_dashboard' }}">
+      <span class="icon">&#9729;</span> REST API Management
+    </a>
+    <a href="{{ url_for('system_integration.overview') }}" class="{{ 'active' if request.blueprint == 'system_integration' }}">
+      <span class="icon">&#128279;</span> System Integration
+    </a>
+    <a href="{{ url_for('performance.dashboard') }}" class="{{ 'active' if request.blueprint == 'performance' }}">
+      <span class="icon">&#9878;</span> Testing &amp; Performance
+    </a>
+    {% endif %}
+    <a href="{{ url_for('dashboard.reports') }}" class="{{ 'active' if request.endpoint == 'dashboard.reports' }}">
+      <span class="icon">&#128269;</span> Reports &amp; Search
+    </a>
+    {% if current_user.role == 'admin' %}
+    <a href="#"><span class="icon">&#128147;</span> Nurses</a>
+    <a href="#"><span class="icon">&#9881;</span> Settings</a>
+    {% endif %}
+    <a href="{{ url_for('auth.logout') }}"><span class="icon">&#8618;</span> Logout</a>
+  </div>
+  {% endif %}
+
+  <div class="{{ 'main' if current_user.is_authenticated else 'auth-main' }}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+</body>
+</html>

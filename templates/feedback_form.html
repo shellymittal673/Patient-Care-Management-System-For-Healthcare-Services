@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Submit Feedback{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('feedback.list_feedback') }}">Feedback</a> / Submit</div>
+<h2 class="page-title">&#11088; Patient Feedback</h2>
+<p class="page-sub">Your feedback helps us improve service quality.</p>
+
+<div class="card" style="max-width:600px;">
+  <form method="POST">
+    <label>Doctor Consulted</label>
+    <select name="doctor_id">
+      <option value="">General feedback (no specific doctor)</option>
+      {% for d in doctors %}
+      <option value="{{ d.id }}">Dr. {{ d.full_name }} ({{ d.specialization or 'General' }})</option>
+      {% endfor %}
+    </select>
+
+    <div class="grid-2">
+      <div>
+        <label>Rate Doctor Performance (1-5)</label>
+        <select name="rating_doctor">
+          <option value="">—</option>
+          {% for i in range(5,0,-1) %}<option value="{{ i }}">{{ '★' * i }}{{ '☆' * (5-i) }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Rate Hospital Services (1-5)</label>
+        <select name="rating_hospital">
+          <option value="">—</option>
+          {% for i in range(5,0,-1) %}<option value="{{ i }}">{{ '★' * i }}{{ '☆' * (5-i) }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <label>Rate Laboratory Services (1-5)</label>
+        <select name="rating_lab">
+          <option value="">—</option>
+          {% for i in range(5,0,-1) %}<option value="{{ i }}">{{ '★' * i }}{{ '☆' * (5-i) }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Rate Pharmacy Services (1-5)</label>
+        <select name="rating_pharmacy">
+          <option value="">—</option>
+          {% for i in range(5,0,-1) %}<option value="{{ i }}">{{ '★' * i }}{{ '☆' * (5-i) }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <label>Comments &amp; Suggestions</label>
+    <textarea name="comments" placeholder="Tell us about your experience..."></textarea>
+
+    <button type="submit" class="btn btn-primary" style="margin-top:14px;">&#128190; Submit Feedback</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+
+<h2 class="page-title">Welcome, Dr. {{ current_user.full_name }}</h2>
+<p class="page-sub">
+  {% if doctor %}{{ doctor.specialization }} · {{ doctor.department or doctor.hospital_branch }}{% else %}Complete your doctor profile to see appointments.{% endif %}
+</p>
+
+<div class="card">
+  <strong>Your Appointments</strong>
+  <table style="margin-top:12px;">
+    <thead>
+      <tr><th>Patient</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for a in appointments %}
+      <tr>
+        <td>{{ a.patient.full_name }}</td>
+        <td>{{ a.appointment_date }}</td>
+        <td>{{ a.appointment_time }}</td>
+        <td>{{ a.reason_for_visit or '—' }}</td>
+        <td><span class="badge badge-{{ a.status.lower().replace('-', '') }}">{{ a.status }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">No appointments scheduled yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

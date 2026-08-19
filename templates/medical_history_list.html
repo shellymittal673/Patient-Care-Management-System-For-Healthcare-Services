@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Medical History{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Medical History</div>
+<h2 class="page-title">&#128209; Patient Medical History</h2>
+<p class="page-sub">Select a patient to view their complete medical history across all modules.</p>
+
+<div class="card">
+  <table>
+    <thead><tr><th>ID</th><th>Full Name</th><th>Age</th><th>Gender</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for p in patients %}
+      <tr>
+        <td>PID{{ '%05d'|format(p.id) }}</td>
+        <td>{{ p.full_name }}</td>
+        <td>{{ p.age or '—' }}</td>
+        <td>{{ p.gender or '—' }}</td>
+        <td><a href="{{ url_for('medical_history.view', patient_id=p.id) }}" class="btn btn-primary btn-sm">View History</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">No patients registered yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

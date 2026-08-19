@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Prescription Management{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Prescriptions / Create</div>
+<h2 class="page-title">Prescription Management</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h3 style="margin-top:0; color:var(--admin);">Create Prescription</h3>
+    <form method="POST" id="rxForm">
+      <div class="grid-2">
+        <div>
+          <label>Patient Name *</label>
+          <select name="patient_id" id="patientSelect" required>
+            <option value="">Select patient</option>
+            {% for p in patients %}
+            <option value="{{ p.id }}" data-age="{{ p.age or '—' }}" data-gender="{{ p.gender or '—' }}">{{ p.full_name }} (P{{ '%04d'|format(p.id) }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Date *</label>
+          <input type="date" name="prescription_date" id="rxDate" required>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <label>Doctor Name *</label>
+          <select name="doctor_id" id="doctorSelect" required>
+            <option value="">Select doctor</option>
+            {% for d in doctors %}
+            <option value="{{ d.id }}">Dr. {{ d.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Diagnosis</label>
+          <input type="text" name="diagnosis" id="rxDiagnosis" placeholder="e.g. Viral Fever">
+        </div>
+      </div>
+
+      <label>Medicine Details</label>
+      <div id="medRows">
+        <div class="grid-2" style="grid-template-columns:2fr 1fr 1.3fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px;">
+          <input type="text" name="medicine_name[]" placeholder="Medicine Name" class="med-input">
+          <input type="text" name="dosage[]" placeholder="Dosage">
+          <input type="text" name="frequency[]" placeholder="Frequency">
+          <input type="text" name="duration[]" placeholder="Duration">
+          <button type="button" onclick="removeMedRow(this)" class="btn btn-delete btn-sm">&#128465;</button>
+        </div>
+      </div>
+      <button type="button" onclick="addMedRow()" class="btn btn-outline btn-sm">+ Add Medicine</button>
+
+      <label>Special Instructions</label>
+      <textarea name="special_instructions" id="rxInstructions" placeholder="e.g. Take after food and drink plenty of water."></textarea>
+
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="submit" class="btn btn-green">&#128190; Save Prescription</button>
+        <button type="reset" class="btn btn-outline">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Prescription Preview</h3><button onclick="window.print()" class="btn btn-green btn-sm">&#128424; Print</button></div>
+    <div id="rxPreview" style="border:1px solid var(--line); border-radius:10px; padding:16px; font-size:0.82rem;">
+      <div style="text-align:center; font-weight:700; color:var(--admin); margin-bottom:4px;">City Care Hospital</div>
+      <div style="text-align:center; color:var(--ink-soft); font-size:0.72rem; margin-bottom:12px;">Electronic City, Bangalore, Karnataka</div>
+      <div style="text-align:center; font-weight:700; letter-spacing:0.05em; margin-bottom:10px;">PRESCRIPTION</div>
+      <table class="info-table" style="margin-bottom:10px;">
+        <tr><td>Patient Name</td><td id="pvPatient">—</td></tr>
+        <tr><td>Doctor Name</td><td id="pvDoctor">—</td></tr>
+        <tr><td>Date</td><td id="pvDate">—</td></tr>
+        <tr><td>Diagnosis</td><td id="pvDiagnosis">—</td></tr>
+      </table>
+      <table style="margin-bottom:10px;">
+        <thead><tr><th>#</th><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th></tr></thead>
+        <tbody id="pvMedList"><tr><td colspan="5" class="empty-state">No medicines added yet</td></tr></tbody>
+      </table>
+      <div><strong>Special Instructions:</strong> <span id="pvInstructions">—</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function addMedRow(){
+  const wrap = document.getElementById('medRows');
+  const row = wrap.firstElementChild.cloneNode(true);
+  row.querySelectorAll('input').forEach(i => i.value = '');
+  wrap.appendChild(row);
+  attachListeners();
+}
+function removeMedRow(btn){
+  const wrap = document.getElementById('medRows');
+  if (wrap.children.length > 1) btn.closest('div').remove();
+  updatePreview();
+}
+function updatePreview(){
+  const pSel = document.getElementById('patientSelect');
+  document.getElementById('pvPatient').textContent = pSel.selectedOptions[0] ? pSel.selectedOptions[0].text : '—';
+  const dSel = document.getElementById('doctorSelect');
+  document.getElementById('pvDoctor').textContent = dSel.selectedOptions[0] ? dSel.selectedOptions[0].text : '—';
+  document.getElementById('pvDate').textContent = document.getElementById('rxDate').value || '—';
+  document.getElementById('pvDiagnosis').textContent = document.getElementById('rxDiagnosis').value || '—';
+  document.getElementById('pvInstructions').textContent = document.getElementById('rxInstructions').value || '—';
+
+  const rows = document.querySelectorAll('#medRows > div');
+  const tbody = document.getElementById('pvMedList');
+  tbody.innerHTML = '';
+  let count = 0;
+  rows.forEach((row, i) => {
+    const inputs = row.querySelectorAll('input');
+    const name = inputs[0].value;
+    if (!name.trim()) return;
+    count++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${count}</td><td>${name}</td><td>${inputs[1].value}</td><td>${inputs[2].value}</td><td>${inputs[3].value}</td>`;
+    tbody.appendChild(tr);
+  });
+  if (count === 0) tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No medicines added yet</td></tr>';
+}
+function attachListeners(){
+  document.querySelectorAll('#rxForm input, #rxForm select, #rxForm textarea').forEach(el => {
+    el.removeEventListener('input', updatePreview);
+    el.addEventListener('input', updatePreview);
+    el.removeEventListener('change', updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+}
+attachListeners();
+document.getElementById('rxDate').valueAsDate = new Date();
+updatePreview();
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Feedback #{{ entry.id }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / <a href="{{ url_for('feedback.list_feedback') }}">Feedback</a> / Details</div>
+<h2 class="page-title">Feedback Details</h2>
+
+<div class="card" style="max-width:560px;">
+  <table class="info-table">
+    <tr><td>Patient</td><td>{{ entry.patient.full_name }}</td></tr>
+    <tr><td>Doctor</td><td>{{ 'Dr. ' + entry.doctor.full_name if entry.doctor else '—' }}</td></tr>
+    <tr><td>Date</td><td>{{ entry.feedback_date }}</td></tr>
+    <tr><td>Doctor Rating</td><td>{{ '★' * (entry.rating_doctor or 0) }}{{ '☆' * (5 - (entry.rating_doctor or 0)) }}</td></tr>
+    <tr><td>Hospital Rating</td><td>{{ '★' * (entry.rating_hospital or 0) }}{{ '☆' * (5 - (entry.rating_hospital or 0)) }}</td></tr>
+    <tr><td>Laboratory Rating</td><td>{{ '★' * (entry.rating_lab or 0) }}{{ '☆' * (5 - (entry.rating_lab or 0)) }}</td></tr>
+    <tr><td>Pharmacy Rating</td><td>{{ '★' * (entry.rating_pharmacy or 0) }}{{ '☆' * (5 - (entry.rating_pharmacy or 0)) }}</td></tr>
+    <tr><td>Average</td><td><strong style="color:var(--primary); font-size:1.1rem;">{{ entry.average_rating or '—' }} / 5</strong></td></tr>
+    <tr><td>Comments</td><td>{{ entry.comments or 'No comments left.' }}</td></tr>
+  </table>
+</div>
+{% endblock %}

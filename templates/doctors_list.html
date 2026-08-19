@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Doctor Management{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Doctors / Doctor List</div>
+<h2 class="page-title">Doctor Management</h2>
+
+{% if current_user.role == 'admin' %}
+<div class="card">
+  <div class="card-head"><h3>&#128100; Add New Doctor</h3></div>
+  <form method="POST" action="{{ url_for('doctors.new_doctor') }}">
+    <div class="grid-3">
+      <div>
+        <label>Doctor Name</label>
+        <input type="text" name="full_name" required placeholder="Enter full name">
+      </div>
+      <div>
+        <label>Specialization</label>
+        <input type="text" name="specialization" placeholder="e.g. Cardiology">
+      </div>
+      <div>
+        <label>Qualification</label>
+        <input type="text" name="qualification" placeholder="Enter qualification">
+      </div>
+    </div>
+    <div class="grid-3">
+      <div>
+        <label>Department</label>
+        <input type="text" name="department" placeholder="Select department">
+      </div>
+      <div>
+        <label>Phone Number</label>
+        <input type="text" name="phone_number" placeholder="Enter phone number">
+      </div>
+      <div>
+        <label>Email Address</label>
+        <input type="email" name="email" placeholder="Enter email address">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <label>Available Time</label>
+        <input type="text" name="available_time" placeholder="e.g. 10:00 AM - 02:00 PM">
+      </div>
+      <div style="display:flex; align-items:flex-end;">
+        <button type="submit" class="btn btn-green" style="width:100%;">+ Add Doctor</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-head"><h3>&#128100; Doctor List</h3></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Doctor ID</th><th>Doctor Name</th><th>Specialization</th><th>Branch</th>
+        <th>Phone Number</th><th>Email Address</th><th>Available Time</th>
+        {% if current_user.role == 'admin' %}<th>Actions</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in doctors %}
+      <tr>
+        <td>DOC{{ '%03d'|format(d.id) }}</td>
+        <td>Dr. {{ d.full_name }}</td>
+        <td>{{ d.specialization or '—' }}</td>
+        <td>{{ d.hospital_branch or d.department or '—' }}</td>
+        <td>{{ d.phone_number or '—' }}</td>
+        <td>{{ d.email or '—' }}</td>
+        <td>{{ d.available_time or '—' }}</td>
+        {% if current_user.role == 'admin' %}
+        <td class="action-links">
+          <a href="{{ url_for('doctors.edit_doctor', doctor_id=d.id) }}" class="btn btn-edit btn-sm">&#9998;</a>
+          <form method="POST" action="{{ url_for('doctors.delete_doctor', doctor_id=d.id) }}"
+                onsubmit="return confirm('Remove Dr. {{ d.full_name }}?');">
+            <button type="submit" class="btn btn-delete btn-sm">&#128465;</button>
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="empty-state">No doctors added yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

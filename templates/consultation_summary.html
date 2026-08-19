@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Consultation Saved{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Consultations / Summary</div>
+
+<div class="flash success">&#9989; Consultation Details Saved Successfully!</div>
+
+<div class="card">
+  <h3 style="margin-top:0; color:var(--admin);">Consultation Summary</h3>
+  <div class="grid-2">
+    <table class="info-table">
+      <tr><td>Patient Name</td><td>{{ consultation.patient.full_name }}</td></tr>
+      <tr><td>Doctor Name</td><td>Dr. {{ consultation.doctor.full_name }}</td></tr>
+      <tr><td>Date of Consultation</td><td>{{ consultation.consultation_date }}</td></tr>
+    </table>
+    <table class="info-table">
+      <tr><td>Symptoms</td><td>{{ consultation.symptoms }}</td></tr>
+      <tr><td>Diagnosis</td><td>{{ consultation.diagnosis }}</td></tr>
+      <tr><td>Treatment / Prescription</td><td>{{ consultation.treatment }}</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="display:flex; gap:10px;">
+  <a href="{{ url_for('consultations.new_consultation') }}" class="btn btn-primary">+ Add Another Consultation</a>
+  <a href="{{ url_for('consultations.list_consultations') }}" class="btn btn-outline">&#9776; View All Consultations</a>
+  <a href="{{ url_for('prescriptions.new_prescription') }}" class="btn btn-green">&#128138; Create Prescription</a>
+</div>
+{% endblock %}

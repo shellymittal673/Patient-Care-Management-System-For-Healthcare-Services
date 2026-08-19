@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Laboratory Management{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Lab Management</div>
+<div class="card-head">
+  <h2 class="page-title" style="margin-bottom:0;">&#129514; Laboratory Management System</h2>
+  {% if current_user.role in ['admin', 'doctor'] %}
+  <a href="{{ url_for('lab.new_request') }}" class="btn btn-green">+ New Test Request</a>
+  {% endif %}
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="num">{{ total }}</div><div class="label">Total Requests</div></div>
+  <div class="stat-card"><div class="num">{{ pending }}</div><div class="label">Pending</div></div>
+  <div class="stat-card"><div class="num">{{ completed }}</div><div class="label">Completed</div></div>
+  <div class="stat-card"><div class="num">{{ tests|selectattr('report_filename')|list|length }}</div><div class="label">Reports Uploaded</div></div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Test Requests</h3></div>
+  <table>
+    <thead>
+      <tr><th>Request ID</th><th>Patient</th><th>Test Name</th><th>Request Date</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      {% for t in tests %}
+      <tr>
+        <td>TR{{ '%05d'|format(t.id) }}</td>
+        <td>{{ t.patient.full_name }}</td>
+        <td>{{ t.test_type }}</td>
+        <td>{{ t.request_date }}</td>
+        <td>
+          {% if t.status == 'Completed' %}<span class="badge badge-completed">{{ t.status }}</span>
+          {% elif t.status == 'In Progress' %}<span class="badge badge-scheduled">{{ t.status }}</span>
+          {% else %}<span class="badge badge-noshow">{{ t.status }}</span>{% endif %}
+        </td>
+        <td class="action-links">
+          {% if t.status != 'Completed' and current_user.role in ['admin','doctor','nurse'] %}
+          <a href="{{ url_for('lab.upload_result', test_id=t.id) }}" class="btn btn-edit btn-sm">Upload Result</a>
+          {% else %}
+          <a href="{{ url_for('lab.view_report', test_id=t.id) }}" class="btn btn-view btn-sm">View Report</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="empty-state">No lab test requests yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

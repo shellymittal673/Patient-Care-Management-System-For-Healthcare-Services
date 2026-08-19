@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Consultations{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Consultations</div>
+<div class="card-head">
+  <h2 class="page-title" style="margin-bottom:0;">Consultation History</h2>
+  {% if current_user.role in ['admin', 'doctor', 'nurse'] %}
+  <a href="{{ url_for('consultations.new_consultation') }}" class="btn btn-green">+ New Consultation</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Date</th><th>Patient</th><th>Doctor</th><th>Diagnosis</th><th>Symptoms</th></tr></thead>
+    <tbody>
+      {% for c in consultations %}
+      <tr>
+        <td>{{ c.consultation_date }}</td>
+        <td>{{ c.patient.full_name }}</td>
+        <td>Dr. {{ c.doctor.full_name }}</td>
+        <td>{{ c.diagnosis or '—' }}</td>
+        <td>{{ c.symptoms or '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">No consultations recorded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

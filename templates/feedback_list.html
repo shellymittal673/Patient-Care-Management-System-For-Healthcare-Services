@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Patient Feedback{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('dashboard.home') }}">Dashboard</a> / Feedback</div>
+<div class="card-head">
+  <div>
+    <h2 class="page-title" style="margin-bottom:0;">&#11088; Patient Feedback &amp; Satisfaction</h2>
+    <p class="page-sub" style="margin-bottom:0;">
+      {% if current_user.role == 'patient' %}Your submitted feedback history{% else %}All patient feedback submissions{% endif %}
+    </p>
+  </div>
+  {% if current_user.role == 'patient' %}
+  <a href="{{ url_for('feedback.new_feedback') }}" class="btn btn-green">+ Submit Feedback</a>
+  {% endif %}
+</div>
+
+{% if current_user.role != 'patient' %}
+<div class="stats-row" style="grid-template-columns:repeat(2,1fr);">
+  <div class="stat-card"><div class="num">{{ entries|length }}</div><div class="label">Total Feedback Entries</div></div>
+  <div class="stat-card"><div class="num">{{ avg_satisfaction or '—' }} / 5</div><div class="label">Average Satisfaction Score</div></div>
+</div>
+
+<div class="card">
+  <form method="GET" class="grid-3" style="align-items:end;">
+    <div>
+      <label>Filter by Doctor</label>
+      <select name="doctor_id" onchange="this.form.submit()">
+        <option value="">All Doctors</option>
+        {% for d in doctors %}
+        <option value="{{ d.id }}" {% if selected_doctor == d.id|string %}selected{% endif %}>Dr. {{ d.full_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Filter by Rating</label>
+      <select name="rating" onchange="this.form.submit()">
+        <option value="">Any Rating</option>
+        {% for i in range(5,0,-1) %}<option value="{{ i }}" {% if selected_rating == i|string %}selected{% endif %}>{{ i }} Stars</option>{% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<div class="card">
+  <table>
+    <thead><tr><th>Date</th><th>Patient</th><th>Doctor</th><th>Doctor Rating</th><th>Hospital</th><th>Lab</th><th>Pharmacy</th><th>Avg</th><th></th></tr></thead>
+    <tbody>
+      {% for e in entries %}
+      <tr>
+        <td>{{ e.feedback_date }}</td>
+        <td>{{ e.patient.full_name }}</td>
+        <td>{{ 'Dr. ' + e.doctor.full_name if e.doctor else '—' }}</td>
+        <td>{{ '★' * (e.rating_doctor or 0) }}</td>
+        <td>{{ '★' * (e.rating_hospital or 0) }}</td>
+        <td>{{ '★' * (e.rating_lab or 0) }}</td>
+        <td>{{ '★' * (e.rating_pharmacy or 0) }}</td>
+        <td><strong>{{ e.average_rating or '—' }}</strong></td>
+        <td><a href="{{ url_for('feedback.view_feedback', feedback_id=e.id) }}" class="btn btn-view btn-sm">View</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="empty-state">No feedback submitted yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
